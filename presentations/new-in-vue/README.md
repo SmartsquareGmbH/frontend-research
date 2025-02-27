@@ -4,7 +4,6 @@
   - Generelle Syntax vorstellen
     - Refs, Computed, Watch, Emits
   - `<script setup>`
-  - Auto imports
   - Vor- und Nachteile und warum Composition besser ist
     - Nicht nach Typ sortieren, sondern nach Logik
   - Composables vs Mixins
@@ -22,6 +21,7 @@
 
 # New Nuxt
 - optionaler Server
+- Auto imports
 - Middleware und Komponenten können nur auf Serverseite laufen (und andersum)
 - `useState`
 - $fetch, useAsyncFetch und useFetch
