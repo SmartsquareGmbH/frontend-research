@@ -20,3 +20,10 @@ src: ./pages/vue.md
 ---
 src: ./pages/nuxt.md
 ---
+
+---
+layout: fact
+---
+
+# Danke fürs Zuhören!
+Slides zu finden im Frontend-Research-Repo auf GitHub
