@@ -22,7 +22,7 @@
 # New Nuxt
 - optionaler Server
 - Auto imports
-- Middleware und Komponenten können nur auf Serverseite laufen (und andersum)
+- Middleware und Komponenten können wahlweise nur auf Serverseite laufen (und andersum)
 - `useState`
 - $fetch, useAsyncFetch und useFetch
   - isometrisch
