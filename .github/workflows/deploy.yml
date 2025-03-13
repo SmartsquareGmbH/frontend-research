@@ -26,12 +26,12 @@ jobs:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
 
-      - name: Build new-in-vue
-        run: |
-          cd presentations/new-in.vue
-          pnpm install
-          pnpm run build
-          mv dist ../../dist/new-in-vue
+      - run: pnpm install
+      - run: pnpm build
+
+      # Copy new-in-vue to top-level dist folder.
+      - run: mkdir -p dist/new-in-vue
+      - run: cp -r presentations/new-in-vue/dist/* dist/new-in-vue
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
