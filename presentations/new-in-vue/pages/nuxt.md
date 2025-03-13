@@ -12,6 +12,7 @@ layout:
     - `ofetch`: API-Wrapper, isometrisch fetchen
 - Nuxi (neue CLI) und Nuxt Dev Tools
 - überall einsetzbar, Rendering dynamisch (Client-side, Server-side, Hydration)
+- überall Hot-reload
 
 ---
 transition: fade-out
@@ -70,6 +71,142 @@ export default defineNuxtConfig({
 ```
 
 <arrow v-click x1="450" y1="450" x2="330" y2="445" color="red" width="2" arrowSize="1" />
+
+---
+transition: fade-out
+---
+
+# Spezifisches Rendering
+
+- Kann auf Component- und Template-Ebene definiert werden
+
+```
+/components/ExampleComponent.client.vue
+/components/ExampleComponent2.server.vue
+```
+
+```vue
+<template>
+  <div>
+    <!-- This renders the "span" element on the server side -->
+    <ClientOnly fallbackTag="span">
+      <!-- this component will only be rendered on client side -->
+      <Comments />
+      <template #fallback>
+        <!-- this will be rendered on server side -->
+        <p>Loading comments...</p>
+      </template>
+    </ClientOnly>
+  </div>
+</template>
+```
+
+---
+transition: fade-out
+---
+
+# Hydration (Best of both worlds)
+
+- SSR für schnelles & initiales Anzeigen der Seite (auch gut für SEO und Accessibility)
+- Im Hintergrund wird JS geladen
+- Hydration: JS wird injiziert und App wird interaktiv & reaktiv wie eine SPA
+
+<img src="../assets/hydration.png" width="60%" alt="Hydration" class="px-6" />
+
+---
+transition: fade-out
+---
+
+# Hydration (Best of both worlds)
+
+- kann zu Mismatches führen
+  - z.B. Zeitanzeige initial mit Server-Zeit und nach Hydration mit User-Client-Zeit
+  - fehlerhafter Zustand und Interaktivität, Verlust von Performance
+- Per Standard aktiviert (Universal Rendering)
+- kann per Route Rules oder mit `ssr: false` deaktiviert werden
+
+---
+transition: fade-out
+---
+
+# Nuxt Server als Backend
+
+- Plugins, Middleware und Routes (Controller Endpoints) können auf Serverseite implementiert werden
+
+```ts
+// /server/routes/api/users/[id].get.ts
+export default defineEventHandler((event) => {
+  const id = getRouterParam(event, 'id')
+
+  return `Hello, user with id ${id}!`
+})
+```
+
+```vue
+<script setup lang="ts">
+  // /pages/index.vue
+  const { data } = await useFetch('/api/users/42')
+</script>
+```
+
+---
+transition: fade-out
+---
+
+# Fetch
+
+- `$fetch()` ist isometrisches `fetch()`
+- für einmalige Requests wie z.B. beim Klick auf einem Button
+- für Requests auf Serverseite
+- kein Auto-caching oder Request-deduplication von Nuxt
+  - mehrere gleiche & gleichzeitige Requests würden alle ausgeführt werden
+
+<br />
+
+```ts
+return await $fetch("https://api.example.invalid/users/12", {
+  method: "DELETE",
+})
+```
+
+---
+transition: fade-out
+layout: two-column
+---
+
+# Fetch
+
+<div class="grid grid-cols-2 gap-sm">
+
+- `useAsyncData()` wie früher `asyncData`
+- Wenn Daten nicht unbedingt von einer API kommen
+- Meist in Pages (oder auch Components & Composables)
+- Für komplexes Fetchen
+- mit Auto-caching und Request-deduplication von Nuxt
+  - mehrere gleiche & gleichzeitige Requests würden nur einmal ausgeführt werden
+
+```vue
+<script setup>
+const { data: products, pending, error } = await useAsyncData(
+  'products', // Unique key
+  async () => {
+    // Custom fetch logic
+    const response = await $fetch('/api/products')
+    return response.items.filter(item => item.inStock)
+  },
+  {
+    // Optional: refresh on route changes
+    watch: [/* reactive dependencies */],
+    // Optional: server-side only
+    server: true,
+    // Optional: lazy loading
+    lazy: false
+  }
+)
+</script>
+```
+
+</div>
 
 ---
 transition: fade-out
@@ -174,3 +311,25 @@ Wann was verwenden?
 - `onErrorCaptured()`: globales oder komplexes Error-Handling, UI-unabhängig, kann Propagation stoppen
 - `error.vue`-Page, wenn fataler Error auftritt
   - Server-Error oder `createError("...", { fatal: true })`
+
+---
+transition: fade-out
+layout: quote
+---
+
+# [Empfohlene Modules](https://nuxt.com/modules)
+
+<div class="grid place-items-center h-full">
+<div class="w-100 text-sm text-left mt-4">
+
+| **Offiziell**          | **Third-party**  |
+|------------------------|------------------|
+| Nuxt Dev Tools (Config) | VueUse Nuxt      |
+| Nuxt Image             | Pinia Nuxt       |
+| Nuxt Icon              | TailwindCSS Nuxt |
+| Nuxt Fonts             | Nuxt i18n        |
+| Nuxt ESlint            | Nuxt Security    |
+| Nuxt Test utils        |                  |
+
+</div>
+</div>

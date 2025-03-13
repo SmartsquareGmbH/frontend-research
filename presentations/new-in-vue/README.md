@@ -17,6 +17,7 @@
   - Pinia
   - useState
 - Vapor mode
+- Generic Components
 - Reactivity Variablen in CSS
 
 # New Nuxt
