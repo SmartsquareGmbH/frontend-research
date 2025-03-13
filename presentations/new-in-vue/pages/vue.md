@@ -198,6 +198,7 @@ transition: fade-out
 
 ---
 transition: fade-out
+mdc: true
 ---
 
 # Composables
@@ -239,6 +240,9 @@ transition: fade-out
   </div>
 </template>
 ```
+
+<br />
+<Mouse />
 
 ---
 transition: fade-out
