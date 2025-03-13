@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "build": "slidev build",
+    "build:pages": "slidev build --base /frontend-research/new-in-vue/",
     "dev": "slidev --open",
     "export": "slidev export"
   },

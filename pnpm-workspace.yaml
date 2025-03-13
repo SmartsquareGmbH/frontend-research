@@ -1,2 +1,4 @@
 packages:
-  - 'presentations/**'
+  - presentations/**
+onlyBuiltDependencies:
+  - esbuild

@@ -20,23 +20,21 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
 
       - run: pnpm install
-      - run: pnpm build
+      - run: pnpm build:pages
 
       # Copy new-in-vue to top-level dist folder.
       - run: mkdir -p dist/new-in-vue
       - run: cp -r presentations/new-in-vue/dist/* dist/new-in-vue
 
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v3
         with:
           path: 'dist'
       - uses: actions/deploy-pages@v4
