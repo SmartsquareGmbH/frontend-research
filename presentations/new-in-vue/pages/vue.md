@@ -290,3 +290,281 @@ transition: fade-out
 - Composables werden empfohlen und Mixins sind "deprecated".
   - Composables sind einfacher wiederzuverwenden und sind nicht mit der Komponente verbunden.
   - Mixins sind schwerer zu verfolgen und können zu Konflikten führen.
+
+---
+transition: fade-out
+---
+
+# Pinia
+
+- Empfohlene Alternative zu Vuex
+- Moderne Schreibweise auf Basis der Composition API
+
+````md magic-move {lines: true}
+```ts
+export const useAuthStore = defineStore("auth", {
+  state: () => ({ user: { name: "admin", password: "test" } }),
+  getters: {
+    username: (state) => state.name,
+  },
+  actions: {
+    logout() {
+      this.user = null
+    },
+  },
+})
+```
+
+```ts
+export const useAuthStore = defineStore("auth", () => {
+  const user = ref({ name: "admin", password: "test" })
+  const username = computed(() => user.name)
+  function logout() {
+    user.value = null
+  }
+
+  return { user, username, logout }
+})
+```
+````
+
+---
+transition: fade-out
+---
+
+# Pinia Usage
+
+````md magic-move {lines: true}
+```vue
+<script setup lang="ts">
+  const store = useAuthStore()
+</script>
+
+<template>
+  <span>{{ store.user.name }}</span>
+  <btn @click="store.logout()">Logout</btn>
+</template>
+```
+
+```vue
+<script setup lang="ts">
+  const store = useAuthStore()
+  const { user, logout } = storeToRefs(store)
+</script>
+
+<template>
+  <span>{{ user.name }}</span>
+  <btn @click="logout()">Logout</btn>
+</template>
+```
+````
+
+---
+transition: fade-out
+---
+
+# EventBus in Vue 3
+
+- In Vue 3 gibt es keinen EventBus mehr, aber folgende Alternativen
+  - [`useEventBus` aus VueUse](https://vueuse.org/core/useEventBus/)
+  - Provide/Inject
+  - useState (Nuxt)
+  - Pinia
+
+---
+transition: fade-out
+---
+
+# Provide/Inject
+
+<img src="../assets/provide-inject1.png" />
+
+---
+transition: fade-out
+---
+
+# Provide/Inject
+
+<img src="../assets/provide-inject2.png" />
+
+---
+transition: fade-out
+---
+
+# Provide/Inject
+
+<div class="grid grid-cols-2 gap-sm">
+
+```vue
+<script setup>
+import { provide, ref } from 'vue'
+
+const location = ref('North Pole')
+
+function updateLocation() {
+  location.value = 'South Pole'
+}
+
+provide('location', {
+  location,
+  updateLocation
+})
+</script>
+```
+
+```vue
+<script setup>
+import { inject } from 'vue'
+
+const { location, updateLocation } = inject('location')
+</script>
+
+<template>
+  <button @click="updateLocation">{{ location }}</button>
+</template>
+```
+
+</div>
+
+---
+transition: fade-out
+---
+
+# Typescript (Props)
+
+````md magic-move {lines: true}
+```vue
+<script setup lang="ts">
+  const props = defineProps<{
+    color: string
+    width?: number
+  }>()
+</script>
+
+<template>
+  <v-icon :color="color" :width="width">md-vue</v-icon>
+</template>
+```
+
+```vue
+<script setup lang="ts">
+  const props = withDefaults(defineProps<{
+    color: string
+    width?: number
+  }>(), { width: 200 })
+</script>
+
+<template>
+  <v-icon :color="color" :width="width">md-vue</v-icon>
+</template>
+```
+
+```vue
+<script setup lang="ts">
+  const { color, width = 200 } = defineProps<{
+    color: string
+    width?: number
+  }>()
+</script>
+
+<template>
+  <v-icon :color="color" :width="width">md-vue</v-icon>
+</template>
+```
+
+```vue
+<script setup lang="ts">
+  interface IconProps {
+    color: string
+    width?: number
+  }
+
+  const { color, width = 200 } = defineProps<IconProps>()
+</script>
+
+<template>
+  <v-icon :color="color" :width="width">md-vue</v-icon>
+</template>
+```
+````
+
+---
+transition: fade-out
+---
+
+# Typescript (Emit)
+
+````md magic-move {lines: true}
+```vue
+<script setup lang="ts">
+  import { ref, watch } from "vue"
+
+  const text = ref("")
+  const emit = defineEmits(['change'])
+
+  watch(text, (newText) => emit('change', newText))
+</script>
+
+<template>
+  <text-field v-model="text" />
+</template>
+```
+
+```vue
+<script setup lang="ts">
+  import { ref, watch } from "vue"
+
+  const text = ref("")
+  const emit = defineEmits<{
+    (e: 'change', text: string): void
+  }>()
+
+  watch(text, (newText) => emit('change', newText))
+</script>
+
+<template>
+  <text-field v-model="text" />
+</template>
+```
+
+```vue
+<script setup lang="ts">
+  import { ref, watch } from "vue"
+
+  const text = ref("")
+  const emit = defineEmits<{
+    change: [text: string]
+  }>()
+
+  watch(text, (newText) => emit('change', newText))
+</script>
+
+<template>
+  <text-field v-model="text" />
+</template>
+```
+````
+
+---
+transition: fade-out
+---
+
+# Typescript (Template Refs )
+
+```vue twoslash
+<script setup lang="ts">
+  import { useTemplateRef } from "vue"
+
+  const form = useTemplateRef('form')
+  
+  function resetForm() {
+    form.value?.reset()
+  }
+</script>
+
+<template>
+  <form ref="form">
+    <text-field />
+  </form>
+</template>
+```
