@@ -156,7 +156,7 @@ transition: fade-out
 # Fetch
 
 - `$fetch()` ist isometrisches `fetch()`
-- für einmalige Requests wie z.B. beim Klick auf einem Button
+- für einmalige Requests wie z.B. beim Klick auf einen Button
 - für Requests auf Serverseite
 - kein Auto-caching oder Request-deduplication von Nuxt
   - mehrere gleiche & gleichzeitige Requests würden alle ausgeführt werden
@@ -171,42 +171,107 @@ return await $fetch("https://api.example.invalid/users/12", {
 
 ---
 transition: fade-out
-layout: two-column
 ---
 
 # Fetch
 
 <div class="grid grid-cols-2 gap-sm">
 
-- `useAsyncData()` wie früher `asyncData`
-- Wenn Daten nicht unbedingt von einer API kommen
-- Meist in Pages (oder auch Components & Composables)
-- Für komplexes Fetchen
-- mit Auto-caching und Request-deduplication von Nuxt
+- `useAsyncData()`-Composable wie früher `asyncData`
+- Nur im Vue-Context
+- Für komplexes Fetchen (oder andere async. Logik)
+- Mit Auto-caching und Request-deduplication von Nuxt
   - mehrere gleiche & gleichzeitige Requests würden nur einmal ausgeführt werden
 
 ```vue
 <script setup>
-const { data: products, pending, error } = await useAsyncData(
-  'products', // Unique key
-  async () => {
-    // Custom fetch logic
-    const response = await $fetch('/api/products')
-    return response.items.filter(item => item.inStock)
-  },
-  {
-    // Optional: refresh on route changes
-    watch: [/* reactive dependencies */],
-    // Optional: server-side only
-    server: true,
-    // Optional: lazy loading
-    lazy: false
-  }
-)
+const { data, status, error, refresh, clear } = 
+  await useAsyncData(
+    'user', // Optional: Unique key
+    async () => {
+      // Custom fetch logic
+      const [posts, followers, activity] = 
+        await Promise.all([
+          $fetch(`/api/users/${userId.value}/posts`),
+          $fetch(`/api/users/${userId.value}/followers`),
+          $fetch(`/api/users/${userId.value}/activity`)
+        ])
+      return { posts, followers, activity }
+    },
+    {
+      // Optional: refresh on route changes
+      watch: [/* reactive dependencies */],
+      // Optional: lazy loading
+      lazy: false
+      // ...
+    }
+  )
 </script>
 ```
 
 </div>
+
+---
+transition: fade-out
+---
+
+# Fetch
+
+<div class="grid grid-cols-3 gap-sm">
+
+<div class="col-span-1">
+
+- `useFetch()`-Composable kombiniert `useAsyncData()` & `$fetch()`
+- Nur im Vue-Context
+- Nur für HTTP-Requests
+- Simpler & automatisch reaktiv
+
+</div>
+<div class="col-span-2">
+
+```vue
+<script setup>
+const page = ref(1)
+const pageSize = ref(10)
+
+const { data: photos, pending, error, refresh } = 
+  await useFetch("/api/photos", {
+    // Optional: set a key for caching
+    key: `photos-${toValue(page)}-${toValue(pageSize)}`,
+    // Optional: set query params
+    params: { page, pageSize },
+    // Optional: transform the response
+    transform: (response) => response.photos,
+    // ...
+  })
+
+function nextPage() {
+  page.value++
+}
+</script>
+```
+
+</div>
+</div>
+
+---
+transition: fade-out
+layout: items
+---
+
+# Fetch
+
+Wann was nutzen?
+
+```mermaid
+flowchart LR
+    A[Bin ich auf dem Server?] -->|Ja| B["$fetch()"]
+    A -->|Nein| C[Mache ich einmalige Anfragen, die **kein** Auto-Caching und Request-Deduplication benötigen?]
+    C -->|Ja| B
+    C -->|Nein| E["Brauche ich flexiblen low-level Zugriff auf komplexe asynchrone Operationen (mehr als nur HTTP)?"]
+    E -->|Ja| F["useAsyncData()"]
+    E -->|Nein| G["useFetch()"]
+```
 
 ---
 transition: fade-out
@@ -263,28 +328,6 @@ transition: fade-out
 
 # Exception Handling
 
-- `<NuxtErrorBoundary>` zum Catchen von Errors im UI
-
-```vue
-<template>
-  <NuxtErrorBoundary @error="someErrorLogger">
-    <!-- Put normal content here for no error case -->
-    <template #error="{ error, clearError }">
-      Oh no, an error occurred: {{ error }}
-      <button @click="clearError">
-        Ignore and continue
-      </button>
-    </template>
-  </NuxtErrorBoundary>
-</template>
-```
-
----
-transition: fade-out
----
-
-# Exception Handling
-
 - Vues `onErrorCaptured()`-Composable zum programmatischen Catchen von Errors
 
 ```vue
@@ -306,11 +349,45 @@ transition: fade-out
 
 # Exception Handling
 
+- `<NuxtErrorBoundary>` zum Catchen von Errors im UI
+- Nutzt `onErrorCaptured()`-Composable intern
+
+```vue
+<template>
+  <NuxtErrorBoundary @error="someErrorLogger">
+    <!-- Put normal content here for no error case -->
+    <template #error="{ error, clearError }">
+      Oh no, an error occurred: {{ error }}
+      <button @click="clearError">
+        Ignore and continue
+      </button>
+    </template>
+  </NuxtErrorBoundary>
+</template>
+```
+
+---
+transition: fade-out
+layout: items
+---
+
+# Exception Handling
+
 Wann was verwenden?
-- `<NuxtErrorBoundary>`: UI-spezifisches Error-Handling
-- `onErrorCaptured()`: globales oder komplexes Error-Handling, UI-unabhängig, kann Propagation stoppen
-- `error.vue`-Page, wenn fataler Error auftritt
-  - Server-Error oder `createError("...", { fatal: true })`
+
+```mermaid
+flowchart LR
+    A["Ist mein Error fatal (Server-Error oder createError() mit fatal: true)?"]
+    B["*error.vue*-Page"]
+    C["Möchte ich globales, komplexes, programmatisches oder UI-unabhängiges Error-Handling?"]
+    D["onErrorCaptured()"]
+    E["NuxtErrorBoundary-Component"]
+
+    A -->|Ja| B
+    A -->|Nein| C
+    C -->|Ja| D
+    C -->|Nein| E
+```
 
 ---
 transition: fade-out
