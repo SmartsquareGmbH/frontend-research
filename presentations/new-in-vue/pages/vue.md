@@ -299,6 +299,144 @@ transition: fade-out
 transition: fade-out
 ---
 
+# APIs im Vergleich
+
+- Options API
+  - simpler zum Einstieg
+
+<div v-click="1">
+
+- Composition API
+  - besser für größere Projekte
+  - bessere Strukturierung (nach Logik, nicht nach Typ)
+  - bessere Wiederverwendbarkeit (Composables statt Mixins)
+  - bessere Typisierung (Typescript)
+  - bessere Performance und Effizienz (Vapor Mode ohne Shadow-DOM, Bundle-Size)
+  - neue Features, Libraries und Docs meistens für Composition API angepasst oder exklusiv
+
+</div>
+
+---
+transition: fade-out
+---
+
+# Strukturierung
+
+<div class="flex justify-center">
+  <img src="/assets/compositionApi.png" class="h-100" />
+</div>
+
+---
+transition: fade-out
+---
+
+````md magic-move {lines: true}
+```vue
+<script> // Options API
+export default {
+  props: { initialItems: { type: Array, required: true } },
+  data() {
+    return { items: [], searchTerm: '', lastSearchTime: null }
+  },
+  computed: {
+    filteredItems() { return this.items
+      .filter(i => i.name.toLowerCase().includes(this.searchTerm.toLowerCase())) },
+    totalItems() { return this.items.length },
+    favoriteCount() { return this.items.filter(i => i.favorite).length }
+  },
+  methods: {
+    toggleFavorite(item) {
+      item.favorite = !item.favorite
+      this.$emit('favorite-changed', item)
+    },
+    logSearch() {
+      this.lastSearchTime = new Date()
+      console.log(`Search at ${this.lastSearchTime}`)
+    }
+  },
+  created() {
+    this.items = this.initialItems.map(item => ({ ...item, favorite: false }))
+  }
+}
+</script>
+```
+
+```vue {*|5-7|9-13|15-25}
+<script setup> // Composition API
+const props = defineProps({ initialItems: { type: Array, required: true } })
+const emit = defineEmits(['favorite-changed'])
+
+const items = ref([])
+onMounted(() => { items.value = props.initialItems.map(item => ({...item, favorite: false})) })
+const totalItems = computed(() => items.value.length)
+
+const favoriteCount = computed(() => items.value.filter(i => i.favorite).length)
+function toggleFavorite(item) {
+  item.favorite = !item.favorite
+  emit('favorite-changed', item)
+}
+
+const searchTerm = ref('')
+const lastSearchTime = ref(null)
+const filteredItems = computed(() => 
+  items.value.filter(item => 
+    item.name.toLowerCase().includes(searchTerm.value.toLowerCase())
+  )
+)
+function logSearch() {
+  lastSearchTime.value = new Date()
+  console.log(`Search at ${lastSearchTime.value}`)
+}
+</script>
+```
+
+```ts
+export function useSearch(items) { // Composable
+  const searchTerm = ref('')
+  const lastSearchTime = ref(null)
+
+  const filteredItems = computed(() => 
+    items.value.filter(i => i.name.toLowerCase().includes(searchTerm.value.toLowerCase()))
+  )
+
+  function logSearch() {
+    lastSearchTime.value = new Date()
+    console.log(`Search at ${lastSearchTime.value}`)
+  }
+
+  return {
+    searchTerm,
+    filteredItems,
+    lastSearchTime,
+    logSearch
+  }
+}
+```
+
+```vue
+<script setup> // Composition API
+const props = defineProps({ initialItems: { type: Array, required: true } })
+const emit = defineEmits(['favorite-changed'])
+
+const items = ref([])
+onMounted(() => { items.value = props.initialItems.map(item => ({...item, favorite: false})) })
+const totalItems = computed(() => items.value.length)
+
+const favoriteCount = computed(() => items.value.filter(i => i.favorite).length)
+function toggleFavorite(item) {
+  item.favorite = !item.favorite
+  emit('favorite-changed', item)
+}
+
+const { searchTerm, filteredItems, logSearch } = useSearch(items)
+</script>
+```
+````
+
+---
+transition: fade-out
+---
+
 # Pinia
 
 - Empfohlene Alternative zu Vuex
