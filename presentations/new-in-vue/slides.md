@@ -22,8 +22,20 @@ src: ./pages/nuxt.md
 ---
 
 ---
+transition: fade-out
 layout: fact
 ---
 
 # Danke fürs Zuhören!
 Slides zu finden im Frontend-Research-Repo auf GitHub
+
+---
+transition: fade-out
+---
+
+# Referenzen
+
+- [Vue Documentation](https://vuejs.org/guide/introduction.html)
+- [Nuxt Documentation](https://nuxt.com/docs/getting-started/introduction)
+- [VueUse Documentation](https://vueuse.org/guide/)
+- [Pinia Documentation](https://pinia.vuejs.org/getting-started.html)
