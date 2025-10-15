@@ -361,6 +361,37 @@ export default {
 </script>
 ```
 
+```vue
+<script lang="ts"> // Class Component API
+@Component export default class MyComponent extends Vue {
+  @Prop({ type: Array, required: true }) readonly initialItems!: Item[]
+
+  items: Item[] = []
+  searchTerm = ''
+  lastSearchTime: Date | null = null
+
+  get filteredItems(): Item[] {
+    const term = this.searchTerm.toLowerCase()
+    return this.items.filter(i => i.name.toLowerCase().includes(term))
+  }
+  // totalItems() ...
+  get favoriteCount(): number {
+    return this.items.filter(i => i.favorite).length
+  }
+
+  toggleFavorite(item: Item): Item {
+    item.favorite = !item.favorite
+      this.$emit('favorite-changed', item)
+  }
+  // logSearch() ...
+  created(): void {
+    this.items = this.initialItems.map(item => ({ ...item, favorite: false }))
+  }
+}
+</script>
+```
+
+
 ```vue {*|5-7|9-13|15-25}
 <script setup> // Composition API
 const props = defineProps({ initialItems: { type: Array, required: true } })
